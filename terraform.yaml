@@ -1,0 +1,41 @@
+---
+
+- name: Database manipulation yaml
+  hosts: localhost
+  user: pi
+  become: yes
+  #vars:
+  tasks:
+
+
+  - name: Download terraform for amd64
+    get_url:
+      url: https://releases.hashicorp.com/terraform/0.13.4/terraform_0.13.4_linux_amd64.zip
+      dest: /tmp/terraform.zip
+      checksum: sha256:a92df4a151d390144040de5d18351301e597d3fae3679a814ea57554f6aa9b24
+    when: ansible_architecture == 'x86_64'
+      #when ansible architecture "ansible_architecture": "x86_64"
+
+
+  - name: Download terraform for arm
+    get_url:
+      url: https://releases.hashicorp.com/terraform/0.13.4/terraform_0.13.4_linux_arm.zip
+      dest: /tmp/terraform.zip
+      checksum: sha256:28f90802515d2ef8468eafbe4b0125fe812ab383d7707429adb2c8f9ff8aab7d
+    when: ansible_architecture.find("arm") != -1
+      # when ansible architecture
+
+  - name: Unzip terraform in /usr/local/bin
+    unarchive:
+      src: /tmp/terraform.zip
+      dest: /usr/local/bin
+      remote_src: yes
+
+  - name: Validate terraform was installed
+    command: terraform -v
+    register: version_output
+
+  - name: Check terraform version
+    debug:
+      var: version_output
+
